@@ -1,46 +1,227 @@
-// Catalogo.js
+// Espera a que todo el contenido del HTML esté cargado antes de ejecutar el script.
+document.addEventListener('DOMContentLoaded', init);
 
-window.addEventListener('DOMContentLoaded', () => {
-    document.title = textos[tipo].tituloPagina;
-    const titulo = document.getElementById("catalogo-title");
-    if (titulo) {
-        titulo.innerText = textos[tipo].titulo;
+// -----------------------------------------------------------------------------
+// 1. ESTADO DE LA APLICACIÓN
+// -----------------------------------------------------------------------------
+let state = {
+    currentSheet: 'Caballero',
+    subcategoriaSeleccionada: 'TODOS'
+};
+
+// -----------------------------------------------------------------------------
+// 2. ELEMENTOS DEL DOM
+// -----------------------------------------------------------------------------
+const DOM = {
+    pageTitle: document.getElementById('catalogo-title'),
+    menuToggle: document.getElementById('menu-toggle'),
+    menu: document.getElementById('menu'),
+    categoryButtons: document.querySelectorAll('.categoria-selector button'),
+    searchInput: document.getElementById('search'),
+    searchButton: document.querySelector('.search-container button'),
+    
+    // Seleccionamos TODOS los botones y selects de subcategorías
+    desktopRopaButtons: document.querySelectorAll('#ropaSubcatDesktop button'),
+    mobileRopaSelect: document.getElementById('subcategoriaRopa'),
+    desktopCalzadoButtons: document.querySelectorAll('#calzadoSubcatDesktop button'),
+    mobileCalzadoSelect: document.getElementById('subcategoriaCalzado'),
+
+    productsContainer: document.getElementById('products'),
+    imgModal: document.getElementById('imgModal'),
+    modalImg: document.querySelector('#imgModal img'),
+    scrollTopBtn: document.getElementById('scrollTopBtn'),
+    whatsappBtn: document.getElementById('whatsapp-link'),
+    bannerImages: document.querySelectorAll('.banner-img')
+};
+
+// -----------------------------------------------------------------------------
+// 3. FUNCIONES DE RENDERIZADO Y UI
+// -----------------------------------------------------------------------------
+/**
+ * Muestra los productos en el contenedor principal.
+ * @param {Array} products - Un array de objetos de producto.
+ */
+function renderProducts(products) {
+    DOM.productsContainer.innerHTML = ''; // Limpia el contenedor.
+
+    if (products.length === 0) {
+        DOM.productsContainer.innerHTML = '<p class="no-products">No se encontraron productos para esta selección.</p>';
+        return;
     }
-});
 
-// Función para mostrar el menú al hacer clic en el botón de menú
-document.addEventListener('DOMContentLoaded', function () {
-    const toggleButton = document.getElementById('menu-toggle');
-    const menu = document.getElementById('menu');
+    products.forEach(item => {
+        const productDiv = document.createElement('div');
+        productDiv.className = 'product';
 
-    if (toggleButton && menu) {
-        toggleButton.addEventListener('click', function () {
-            menu.classList.toggle('active');
-        });
-    }
-});
+        // Si el stock del producto incluye "nuevo!", le añadimos una clase especial.
+        if (item.stock.includes("nuevo!")) {
+            productDiv.classList.add('producto-nuevo');
+        }
 
-// Script principal
-let currentSheet = 'Caballero';
-
-function cambiarCategoria(elemento, categoria) {
-    currentSheet = categoria;
-    subcategoriaSeleccionada = "TODOS"; // Reset subcategoría
-    document.getElementById("subcategoria").value = "TODOS"; // Actualiza selector visual
-    actualizarActivos('categoria-selector', elemento);
-    actualizarActivos('subcategoria-selector', null);
-    history.pushState({ categoria }, '', `?cat=${categoria}`);
-    loadProducts();
+        productDiv.innerHTML = `
+            <img src="${item.imagen}" alt="${item.nombre}" data-img-src="${item.imagen}" onerror="this.onerror=null; this.src='img/imagen-generica.png';">
+            <h4>${item.nombre}</h4>
+            <div class="price-container">
+                <p class="price">${textos[tipo].etiquetaPrecio}: $${formatPrice(item.precio)}</p>
+                <p class="promo-price">${textos[tipo].etiquetaPromo}: $${formatPrice(item.precioPromo)}</p>
+            </div>
+        `;
+        DOM.productsContainer.appendChild(productDiv);
+    });
 }
 
+function formatPrice(value) {
+    if (value === null || value === undefined) return '0';
+    return parseFloat(value).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
 
-// Función para seleccionar subcategorías (esta función ya existe, pero la mantengo para el contexto)
-function filterProducts() {
-    const searchTerm = document.getElementById("search").value.toLowerCase();
-    // La lógica de filtrado por subcategoría y búsqueda se aplica en loadProducts
-    // Esto asegura que la URL refleje correctamente los filtros activos.
-    history.pushState({ categoria: currentSheet, subcategoria: subcategoriaSeleccionada, search: searchTerm }, '', `?cat=${currentSheet}&subcat=${subcategoriaSeleccionada}&search=${encodeURIComponent(searchTerm)}`);
+function updateActiveButton(buttonGroup, activeButton) {
+    buttonGroup.forEach(btn => btn.classList.remove('active'));
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+}
 
+function updateBanner() {
+    DOM.bannerImages.forEach(img => img.classList.add('hidden'));
+    let bannerId = '';
+    const isFootwear = state.currentSheet === 'Calzado';
+    if (tipo === 'minorista') {
+        bannerId = isFootwear ? 'banner-minorista-calzado' : 'banner-minorista-indumentaria';
+    } else {
+        bannerId = isFootwear ? 'banner-mayorista-calzado' : 'banner-mayorista-indumentaria';
+    }
+    const activeBanner = document.getElementById(bannerId);
+    if (activeBanner) {
+        activeBanner.classList.remove('hidden');
+    }
+}
+
+function updateURL() {
+    const searchTerm = DOM.searchInput.value || '';
+    const url = `?tipo=${tipo}&cat=${state.currentSheet}&subcat=${state.subcategoriaSeleccionada}&search=${encodeURIComponent(searchTerm)}`;
+    history.pushState(state, '', url);
+}
+
+function renderProducts(products) {
+    DOM.productsContainer.innerHTML = ''; // Limpia el contenedor.
+
+    if (products.length === 0) {
+        DOM.productsContainer.innerHTML = '<p class="no-products">No se encontraron productos para esta selección.</p>';
+        return;
+    }
+
+    products.forEach(item => {
+        const productDiv = document.createElement('div');
+        productDiv.className = 'product';
+
+        if (item.stock.includes("nuevo!")) {
+            productDiv.classList.add('producto-nuevo');
+        }
+
+        // --- LÓGICA DE RENDERIZADO UNIFICADA ---
+        // Generamos dinámicamente las líneas de precios para CUALQUIER producto
+        const preciosHTML = item.precios.map(p => 
+            `<p class="price-line"><span class="price-label">${p.label}:</span> <span class="price-value">$${formatPrice(p.value)}</span></p>`
+        ).join('');
+
+        // Usamos el mismo HTML para todas las tarjetas de producto
+        productDiv.innerHTML = `
+            <img src="${item.imagen}" alt="${item.nombre}" data-img-src="${item.imagen}" onerror="this.onerror=null; this.src='img/imagen-generica.png';">
+            <h4>${item.nombre}</h4>
+            <div class="price-container-calzado">
+                ${preciosHTML}
+            </div>
+        `;
+        
+        DOM.productsContainer.appendChild(productDiv);
+    });
+}
+
+// -----------------------------------------------------------------------------
+// 4. LÓGICA DE DATOS Y FILTRADO
+// -----------------------------------------------------------------------------
+async function loadAndRenderProducts() {
+    DOM.productsContainer.innerHTML = '<p class="loading">Cargando productos...</p>';
+    const baseURL = 'https://docs.google.com/spreadsheets/d/1eWYNOMN0yQ_f8sOpSQvyHmwCAaohESkC4D73bEs60r8/gviz/tq?tqx=out:json&sheet=';
+    
+    try {
+        const response = await fetch(baseURL + state.currentSheet);
+        const text = await response.text();
+        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const jsonData = JSON.parse(jsonText);
+        const rows = jsonData.table.rows;
+
+        const allProducts = rows.map(row => {
+            let producto; // Creamos una variable para el producto
+
+            if (state.currentSheet === 'Calzado') {
+                // Lógica para Calzado (como ya la teníamos)
+                producto = {
+                    nombre: row.c[2]?.v || "Sin nombre",
+                    imagen: row.c[7]?.v?.trim() || "img/imagen-generica.png",
+                    stock: String(row.c[8]?.v || "no disponible").trim().toLowerCase(),
+                    tipoPrenda: (row.c[1]?.v || '').toString().toUpperCase(),
+                    precios: []
+                };
+                
+                if (tipo === 'mayorista') {
+                    producto.precios = [
+                        { label: '1 a 3 pares', value: row.c[4]?.v || 0 },
+                        { label: '3 a 18 pares', value: row.c[5]?.v || 0 },
+                        { label: '+ de 18 pares', value: row.c[6]?.v || 0 }
+                    ];
+                } else { // minorista
+                    producto.precios = [
+                        { label: 'Precio', value: row.c[3]?.v || 0 }
+                    ];
+                }
+            } else {
+                // --- Lógica MODIFICADA para Ropa ---
+                // Ahora también crea un array de precios para ser consistente
+                producto = {
+                    nombre: row.c[1]?.v || "Sin nombre",
+                    imagen: row.c[5]?.v?.trim() || "img/imagen-generica.png",
+                    stock: String(row.c[6]?.v || "no disponible").trim().toLowerCase(),
+                    tipoPrenda: (row.c[0]?.v || '').toString().substring(0, 4).toUpperCase(),
+                    precios: [
+                        { 
+                            label: textos[tipo].etiquetaPrecio, 
+                            value: (tipo === 'mayorista' ? row.c[2]?.v : row.c[4]?.v) || 0 
+                        },
+                        { 
+                            label: textos[tipo].etiquetaPromo, 
+                            value: (tipo === 'mayorista' ? row.c[4]?.v : row.c[3]?.v) || 0 
+                        }
+                    ]
+                };
+            }
+            return producto;
+        }).filter(item => item.stock && !item.stock.includes("no disponible"));
+
+        const filteredProducts = filterProductsBySubcategory(allProducts);
+        renderProducts(filteredProducts);
+        applySearchFilter();
+        updateBanner();
+
+    } catch (error) {
+        DOM.productsContainer.innerHTML = '<p class="error">Error al cargar productos.</p>';
+        console.error('Error cargando productos:', error);
+    }
+}
+
+function filterProductsBySubcategory(products) {
+    const { subcategoriaSeleccionada } = state;
+    if (subcategoriaSeleccionada === "TODOS") {
+        return products.sort((a, b) => b.stock.includes("nuevo!") - a.stock.includes("nuevo!"));
+    }
+    // Lógica unificada: funciona para ropa y calzado
+    const filtros = subcategorias[subcategoriaSeleccionada] || [];
+    return products.filter(p => filtros.includes(p.tipoPrenda));
+}
+
+function applySearchFilter() {
+    const searchTerm = DOM.searchInput.value.toLowerCase();
     const products = document.querySelectorAll(".product");
     products.forEach(product => {
         const name = product.querySelector("h4").textContent.toLowerCase();
@@ -48,335 +229,129 @@ function filterProducts() {
     });
 }
 
+// -----------------------------------------------------------------------------
+// 5. MANEJADORES DE EVENTOS (EVENT HANDLERS)
+// -----------------------------------------------------------------------------
+function handleCategoryChange(event) {
+    state.currentSheet = event.target.dataset.category;
+    state.subcategoriaSeleccionada = "TODOS";
+    updateActiveButton(DOM.categoryButtons, event.target);
 
-// Manejo del botón atrás del navegador
-window.addEventListener('popstate', function (event) {
-    const params = new URLSearchParams(location.search);
-    const cat = params.get('cat') || 'Caballero';
-    const subcat = params.get('subcat') || 'TODOS';
-    const search = params.get('search') || '';
+    const ropaDesktop = document.getElementById('ropaSubcatDesktop');
+    const ropaMobile = document.getElementById('ropaSubcatMobile');
+    const calzadoDesktop = document.getElementById('calzadoSubcatDesktop');
+    const calzadoMobile = document.getElementById('calzadoSubcatMobile');
 
-    currentSheet = cat;
-    subcategoriaSeleccionada = subcat;
-
-    // Actualizar buscador
-    document.getElementById("search").value = search;
-    // Actualizar subcategoría en el selector móvil
-    document.getElementById("subcategoria").value = subcat;
-
-
-    // Actualizar botones visuales de categoría
-    const catContainer = document.getElementsByClassName('categoria-selector')[0];
-    if (catContainer) {
-        const botones = catContainer.getElementsByTagName('button');
-        for (let boton of botones) {
-            boton.classList.toggle('active', boton.textContent.trim().toLowerCase() === cat.toLowerCase());
-        }
+    if (state.currentSheet === 'Calzado') {
+        ropaDesktop.style.display = 'none';
+        ropaMobile.style.display = 'none';
+        calzadoDesktop.style.display = '';
+        calzadoMobile.style.display = '';
+        updateActiveButton(DOM.desktopCalzadoButtons, DOM.desktopCalzadoButtons[0]);
+        DOM.mobileCalzadoSelect.value = "TODOS";
+    } else if (state.currentSheet === 'Accesorios') {
+        ropaDesktop.style.display = 'none';
+        ropaMobile.style.display = 'none';
+        calzadoDesktop.style.display = 'none';
+        calzadoMobile.style.display = 'none';
+    } else { // Caballero y Dama
+        ropaDesktop.style.display = '';
+        ropaMobile.style.display = '';
+        calzadoDesktop.style.display = 'none';
+        calzadoMobile.style.display = 'none';
+        updateActiveButton(DOM.desktopRopaButtons, DOM.desktopRopaButtons[0]);
+        DOM.mobileRopaSelect.value = "TODOS";
     }
-
-    // Actualizar botones visuales de subcategoría (para desktop)
-    const subcatContainer = document.getElementsByClassName('subcategoria-selector')[0];
-    if (subcatContainer) {
-        const botones = subcatContainer.getElementsByTagName('button');
-        // Asegúrate de encontrar el botón correcto basado en el texto y no solo en "includes"
-        for (let boton of botones) {
-            let botonText = boton.textContent.trim().toUpperCase();
-            // Algunas opciones de subcategoría tienen texto más largo, necesitamos mapearlas
-            let mappedSubcat = subcat;
-            if (subcat === 'CAMPERAS') mappedSubcat = 'CAMPERAS / ROMPEVIENTOS';
-            else if (subcat === 'REMERAS') mappedSubcat = 'REMERAS / MUSCULOSAS / CHOMBAS';
-            else if (subcat === 'PANTALONES') mappedSubcat = 'BABUCHAS / JOGGINGS / PANTALONES';
-            else if (subcat === 'SHORTS') mappedSubcat = 'BERMUDAS / SHORTS';
-
-
-            boton.classList.toggle('active', botonText.includes(mappedSubcat) || botonText === mappedSubcat);
-        }
-    }
-
-    // Recargar productos filtrados
-    loadProducts();
-});
-
-
-
-// Cargar productos desde Google Sheets
-async function loadProducts() {
-
-    const baseURL = 'https://docs.google.com/spreadsheets/d/1eWYNOMN0yQ_f8sOpSQvyHmwCAaohESkC4D73bEs60r8/gviz/tq?tqx=out:json&sheet=';
-    const productsContainer = document.getElementById('products');
-    productsContainer.innerHTML = '<p class="loading">Cargando productos...</p>'; // Mostrar indicador de carga
-
-    try {
-        const response = await fetch(baseURL + currentSheet);
-        const text = await response.text();
-        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const jsonData = JSON.parse(jsonText);
-        const rows = jsonData.table.rows;
-
-        let newProducts = [];
-        let regularProducts = [];
-
-        rows.forEach(row => {
-            const item = {
-                nombre: row.c[1]?.v || "Sin nombre",
-                precio: tipo === 'mayorista' ? row.c[2]?.v || 0 : row.c[4]?.v || 0,
-                precioPromo: tipo === 'mayorista' ? row.c[4]?.v || 0 : row.c[3]?.v || 0,
-                imagen: row.c[5]?.v && row.c[5].v.trim() !== "" ? row.c[5].v : "img/imagen-generica.png",
-                stock: row.c[6]?.v ? String(row.c[6].v).trim().toLowerCase() : "No disponible"
-            };
-            const tipoPrenda = row.c[0]?.v ? row.c[0].v.substring(0, 4).toUpperCase() : "";
-
-            // Verificar si el producto debe ser mostrado
-            if (item.stock.toLowerCase().includes("no disponible")) {
-                return; // No mostrar productos sin stock disponible
-            }
-
-            // Filtrar por subcategoría, si no es "NUEVOS"
-            if (subcategoriaSeleccionada === "NUEVOS") {
-                if (item.stock.includes("nuevo!")) { // Solo los "Nuevos!" cuando la subcategoría es "NUEVOS"
-                    newProducts.push(item);
-                }
-                return; // Si estamos en "NUEVOS", no procesamos los regulares aquí
-            } else if (subcategoriaSeleccionada !== "TODOS") {
-                const filtros = subcategorias[subcategoriaSeleccionada] || [];
-                if (!filtros.includes(tipoPrenda)) {
-                    return; // Si no está en los filtros permitidos para la subcategoría, no lo mostramos
-                }
-            }
-
-
-            // Separar productos "Nuevos!" para mostrarlos primero
-            if (item.stock.includes("Nuevo!")) {
-                newProducts.push(item);
-            } else {
-                regularProducts.push(item);
-            }
-        });
-
-        // Combinar arrays: Nuevos primero, luego Regulares
-        const productsToDisplay = newProducts.concat(regularProducts);
-
-        productsContainer.innerHTML = ''; // Limpiar el contenedor antes de añadir los productos
-
-        if (productsToDisplay.length === 0) {
-            productsContainer.innerHTML = '<p class="no-products">No se encontraron productos para esta selección.</p>';
-            return;
-        }
-
-        productsToDisplay.forEach(item => {
-            const productDiv = document.createElement('div');
-            productDiv.className = 'product';
-
-            productDiv.innerHTML = `
-                    <img src="${item.imagen}" alt="${item.nombre}" onerror="this.onerror=null; this.src='img/imagen-generica.png';">
-                    <h4>${item.nombre}</h4>
-                    <div class="price-container">
-                    <p class="price">${textos[tipo].etiquetaPrecio}: $${formatPrice(item.precio)}</p>
-                    <p class="promo-price">${textos[tipo].etiquetaPromo}: $${formatPrice(item.precioPromo)}</p>
-                    </div>
-                `;
-            productsContainer.appendChild(productDiv);
-        });
-
-        // Después de cargar los productos, aplicar el filtro de búsqueda
-        filterProducts(); // Llamar a filterProducts para aplicar el término de búsqueda
-    } catch (error) {
-        productsContainer.innerHTML = '<p class="error">Error al cargar productos.</p>';
-        console.error('Error cargando productos:', error);
-    }
-}
-function formatPrice(value) {
-    if (value === null || value === undefined) return '0'; // Manejo de valores nulos o indefinidos
-    return parseFloat(value).toLocaleString('es-AR'); // Formato argentino
+    
+    updateURL();
+    loadAndRenderProducts();
 }
 
+function handleSubcategoryChange(event) {
+    state.subcategoriaSeleccionada = event.target.dataset.subcat;
+    updateActiveButton(DOM.desktopRopaButtons, event.target);
+    updateActiveButton(DOM.desktopCalzadoButtons, event.target);
+    DOM.mobileRopaSelect.value = state.subcategoriaSeleccionada;
+    DOM.mobileCalzadoSelect.value = state.subcategoriaSeleccionada;
+    updateURL();
+    loadAndRenderProducts();
+}
 
-// Carga inicial desde parámetros en la URL
+function handleMobileSubcategoryChange(event) {
+    state.subcategoriaSeleccionada = event.target.value;
+    const correspondingRopaBtn = Array.from(DOM.desktopRopaButtons).find(btn => btn.dataset.subcat === state.subcategoriaSeleccionada);
+    updateActiveButton(DOM.desktopRopaButtons, correspondingRopaBtn);
+    const correspondingCalzadoBtn = Array.from(DOM.desktopCalzadoButtons).find(btn => btn.dataset.subcat === state.subcategoriaSeleccionada);
+    updateActiveButton(DOM.desktopCalzadoButtons, correspondingCalzadoBtn);
+    updateURL();
+    loadAndRenderProducts();
+}
 
-let subcategoriaSeleccionada = "TODOS";
+function handleSearch() { applySearchFilter(); }
+function handleImageClick(event) { if (event.target.matches('.product img')) { DOM.modalImg.src = event.target.dataset.imgSrc; DOM.imgModal.style.display = "flex"; document.body.style.overflow = "hidden"; } }
+function handleModalClose() { DOM.imgModal.style.display = "none"; document.body.style.overflow = ""; }
+function handleScroll() { const isScrolled = document.body.scrollTop > 500 || document.documentElement.scrollTop > 500; DOM.scrollTopBtn.style.display = isScrolled ? "block" : "none"; }
+function handleScrollTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function handlePopState(event) { if (event.state) { state = event.state; initializeAppState(); } }
 
+// -----------------------------------------------------------------------------
+// 6. INICIALIZACIÓN
+// -----------------------------------------------------------------------------
+function init() {
+    DOM.menuToggle.addEventListener('click', () => DOM.menu.classList.toggle('active'));
+    DOM.categoryButtons.forEach(btn => btn.addEventListener('click', handleCategoryChange));
+    
+    // Añadimos listeners para AMBOS grupos de subcategorías
+    DOM.desktopRopaButtons.forEach(btn => btn.addEventListener('click', handleSubcategoryChange));
+    DOM.desktopCalzadoButtons.forEach(btn => btn.addEventListener('click', handleSubcategoryChange));
+    DOM.mobileRopaSelect.addEventListener('change', handleMobileSubcategoryChange);
+    DOM.mobileCalzadoSelect.addEventListener('change', handleMobileSubcategoryChange);
+
+    DOM.searchInput.addEventListener('keyup', handleSearch);
+    DOM.searchButton.addEventListener('click', handleSearch);
+    DOM.scrollTopBtn.addEventListener('click', handleScrollTop);
+    
+    document.addEventListener('click', handleImageClick);
+    DOM.imgModal.addEventListener('click', handleModalClose);
+    document.addEventListener('keydown', (e) => e.key === "Escape" && handleModalClose());
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('popstate', handlePopState);
+    initializeAppState();
+    
+    const numeroWhatsapp = textos[tipo].whatsapp;
+    DOM.whatsappBtn.href = `https://wa.me/${numeroWhatsapp}`;
+}
+
+function initializeAppState() {
+    const params = new URLSearchParams(window.location.search);
+    state.currentSheet = params.get('cat') || 'Caballero';
+    state.subcategoriaSeleccionada = params.get('subcat') || 'TODOS';
+    DOM.searchInput.value = params.get('search') || '';
+    DOM.pageTitle.textContent = textos[tipo].tituloPagina;
+    
+    // Simula un clic en la categoría activa para configurar la UI correctamente
+    const activeCatBtn = Array.from(DOM.categoryButtons).find(btn => btn.dataset.category === state.currentSheet);
+    if(activeCatBtn) activeCatBtn.click();
+    
+    // Restablece la subcategoría después del clic simulado
+    state.subcategoriaSeleccionada = params.get('subcat') || 'TODOS';
+    loadAndRenderProducts();
+}
+
+// Objeto de mapeo de subcategorías con todos tus códigos
 const subcategorias = {
-    "TODOS": [],
-    "NUEVOS": [], // Nueva subcategoría para productos "Nuevos!"
+    // Ropa
     "BUZOS": ["BUZO", "CANG", "SUET", "PULO"],
     "CAMPERAS": ["CAMP", "PARK", "ROMP", "CHAQ", "CHAL", "PUFF", "ANOR"],
-    "REMERAS": ["REME", "MUSC", "CHOM", "CAMI"],
+    "REMERAS": ["REME", "MUSC", "CHOM", "CAMI"], 
     "TOPS": ["TOPM", "TOPR", "TOPL", "TOPJ", "TOPD", "TOPC", "TOPB", "TOPP", "TOPS", "TOPT", "TOPG", "TOPA", "TOPH", "TOPF", "TOPI", "TOPU", "TOPV", "TOPL", "TOPN", "CORP"],
     "PANTALONES": ["PANT", "JEAN", "JOGG", "CARG", "BABU", "CHIN", "CHUP", "EPAN"],
-    "CALZAS": ["CALZ"],
-    "SHORTS": ["BERM", "SHOR", "POLL", "MALL"],
-};
-
-// Función para filtrar subcategoría
-function filtrarSubcategoria(subcat, elemento) {
-    subcategoriaSeleccionada = subcat;
-    actualizarActivos('subcategoria-selector', elemento);
-    const searchTerm = document.getElementById("search").value.toLowerCase();
-    history.pushState({ categoria: currentSheet, subcategoria: subcategoriaSeleccionada, search: searchTerm }, '', `?cat=${currentSheet}&subcat=${subcat}&search=${encodeURIComponent(searchTerm)}`);
-    loadProducts();
-}
-
-// Función para seleccionar subcategoría desde el menú desplegable
-function seleccionarSubcategoriaDesdeMenu() {
-    const select = document.getElementById("subcategoria");
-    const subcat = select.value;
-
-    subcategoriaSeleccionada = subcat;
-
-    // Guardamos en la URL
-    const searchTerm = document.getElementById("search").value.toLowerCase();
-    history.pushState(
-        { categoria: currentSheet, subcategoria: subcat, search: searchTerm },
-        '',
-        `?cat=${currentSheet}&subcat=${subcat}&search=${encodeURIComponent(searchTerm)}`
-    );
-
-    loadProducts();
-}
-
-// Función que actualiza los botones activos
-function actualizarActivos(selectorClass, elementoActivo) {
-    const container = document.getElementsByClassName(selectorClass)[0];
-    if (container) {
-        const botones = container.getElementsByTagName('button');
-        for (let boton of botones) {
-            boton.classList.remove('active');
-        }
-        if (elementoActivo) {
-            elementoActivo.classList.add('active');
-        }
-    }
-}
-
-window.onload = () => {
-    const params = new URLSearchParams(location.search);
-    const cat = params.get('cat') || 'Caballero';
-    const subcat = params.get('subcat') || 'TODOS'; // Leer la subcategoría de la URL
-    const search = params.get('search') || '';
-
-    currentSheet = cat;
-    subcategoriaSeleccionada = subcat; // Establecer la subcategoría al cargar
-
-    // Asegurarse de que los botones de categoría y subcategoría estén activos al cargar
-    const catButtons = document.querySelectorAll('.categoria-selector button');
-    catButtons.forEach(btn => {
-        if (btn.textContent.trim().toLowerCase() === cat.toLowerCase()) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-
-    const subcatButtons = document.querySelectorAll('.subcategoria-selector button');
-    subcatButtons.forEach(btn => {
-        // Normaliza el texto del botón y el valor de la subcategoría para una comparación precisa
-        let btnText = btn.textContent.trim().toUpperCase();
-        let currentSubcatValue = subcat.toUpperCase();
-
-        // Manejo de textos más largos en los botones
-        if (currentSubcatValue === 'CAMPERAS') currentSubcatValue = 'CAMPERAS / ROMPEVIENTOS';
-        else if (currentSubcatValue === 'REMERAS') currentSubcatValue = 'REMERAS / MUSCULOSAS';
-        else if (currentSubcatValue === 'PANTALONES') currentSubcatValue = 'BABUCHAS / JOGGINGS / PANTALONES';
-        else if (currentSubcatValue === 'SHORTS') currentSubcatValue = 'BERMUDAS / SHORTS';
-        else if (currentSubcatValue === 'TODOS') currentSubcatValue = 'TODOS';
-        else if (currentSubcatValue === 'NUEVOS') currentSubcatValue = 'NUEVOS';
-
-
-        if (btnText === currentSubcatValue) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-
-    // Actualizar el selector de subcategoría móvil
-    const mobileSubcatSelect = document.getElementById("subcategoria");
-    if (mobileSubcatSelect) {
-        mobileSubcatSelect.value = subcat;
-    }
-
-    loadProducts().then(() => {
-        document.getElementById("search").value = search;
-        filterProducts(); // Asegúrate de aplicar el filtro de búsqueda después de cargar los productos
-    });
-};
-
-
-// Ampliar imagen al hacer click y mostrar en modal
-const modal = document.getElementById("imgModal");
-const modalImg = modal.querySelector("img");
-
-document.addEventListener("click", function (e) {
-    if (e.target.tagName === "IMG" && e.target.closest(".product")) {
-        modalImg.src = e.target.src;
-        modal.style.display = "flex";
-        document.body.style.overflow = "hidden";
-        modal.focus(); // Asegurarse de que el modal tenga foco para capturar eventos de teclado
-
-        // Añadir el hash #modal solo si no está ya presente
-        if (location.hash !== "#modal") {
-            // Reemplazar el estado actual en lugar de empujar uno nuevo
-            // Esto evita que history.back() recargue la página en el cierre.
-            history.replaceState({ modalOpen: true }, "", "#modal");
-        }
-    }
-});
-
-// Manejo del cierre del modal por clic en el fondo
-modal.addEventListener("click", function (e) {
-    if (e.target === modal) {
-        cerrarModal(); // Llama a cerrarModal sin argumentos especiales para clic/escape
-        e.stopPropagation();
-        e.preventDefault();
-    }
-});
-
-// Manejo del cierre del modal por tecla Escape
-document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && modal.style.display === "flex") {
-        cerrarModal(); // Llama a cerrarModal sin argumentos especiales para clic/escape
-        e.stopPropagation();
-        e.preventDefault();
-    }
-});
-
-function cerrarModal() {
-    modal.style.display = "none";
-    modalImg.src = "";
-    document.body.style.overflow = "";
-
-    // Si el hash es #modal, lo eliminamos sin afectar el historial de navegación
-    // Esto previene la recarga al cerrar el modal programáticamente.
-    if (location.hash === "#modal") {
-        history.replaceState({}, document.title, window.location.pathname + window.location.search);
-    }
-}
-
-// Manejo del cierre del modal al usar el botón "atrás" del navegador
-window.addEventListener("popstate", function (event) {
-    // Si el modal está abierto y el hash NO es "#modal" (es decir, el navegador
-    // ya retrocedió eliminando el hash), entonces cerramos el modal visualmente.
-    if (modal.style.display === "flex" && location.hash !== "#modal") {
-        modal.style.display = "none";
-        modalImg.src = "";
-        document.body.style.overflow = "";
-    }
-    // Si el hash SIGUE siendo "#modal" (ej. si presionan atrás y el navegador no lo quita por alguna razón),
-    // o si el modal ya estaba cerrado, no hacemos nada extra para evitar recargas.
-});
-
-// Botón para volver al inicio de la página
-const scrollTopBtn = document.getElementById("scrollTopBtn");
-
-window.onscroll = function () {
-    if (document.body.scrollTop > 500 || document.documentElement.scrollTop > 500) {
-        scrollTopBtn.style.display = "block";
-    } else {
-        scrollTopBtn.style.display = "none";
-    }
-};
-
-scrollTopBtn.onclick = function () {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
+    "CALZAS": ["CALZ"], "SHORTS": ["BERM", "SHOR", "POLL", "MALL"],
+    // Calzado
+    "Jaguar": ["111", "112"],
+    "Gaelle": ["371", "382", "406", "426", "427", "430W", "431W", "432W", "434W", "435", "443", "444", "448", "449W", "451", "462W", "463W", "464", "466", "465W", "467", "469W", "471W", "472W", "473W", "474", "476", "481W", "490W", "493", "498", "499W", "500W", "501"],
+    "Maraton": ["411"],
+    "Havaianas": ["511", "531", "521"],
+    "I-RUN": ["311", "312"]
 };

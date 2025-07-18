@@ -1,108 +1,108 @@
-<!-- IDC - Página de inicio -->
-<!-- IDC - Catálogo de Revendedores -->
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="title">Catálogo</title>
+    <title id="catalogo-title">Catálogo</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
     <header>
-        <img src="img/logo-idc.png" alt="Indumentaria Deportiva CBA">
+        <img src="img/logo-idc.png" alt="Indumentaria Deportiva CBA Logo">
         <nav>
-            <!-- Botón hamburguesa (solo visible en móvil) -->
             <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
                 <i class="fa-solid fa-bars"></i>
             </button>
-
-            <!-- Enlaces de navegación -->
             <ul id="menu" class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="catalogo.html?tipo=minorista">Minoristas</a></li>
                 <li><a href="catalogo.html?tipo=mayorista">Revendedores</a></li>
                 <li><a href="#">Tienda Online (Próximamente)</a></li>
             </ul>
-
         </nav>
     </header>
 
     <section class="banner">
-        <img src="img/banner.png" alt="Banner">
+        <img src="img/banner-mino.png" alt="Banner Minorista Indumentaria" id="banner-minorista-indumentaria" class="banner-img hidden">
+        <img src="img/banner-mino-zapas.png" alt="Banner Minorista Calzado" id="banner-minorista-calzado" class="banner-img hidden">
+        <img src="img/banner-mayo.png" alt="Banner Mayorista Indumentaria" id="banner-mayorista-indumentaria" class="banner-img hidden">
+        <img src="img/banner-mayo-zapas.png" alt="Banner Mayorista Calzado" id="banner-mayorista-calzado" class="banner-img hidden">
     </section>
 
-    <!-- Botones de categoría -->
     <div class="categoria-selector">
-        <button onclick="cambiarCategoria(this, 'Caballero')">Caballero</button>
-        <button onclick="cambiarCategoria(this, 'Dama')">Dama</button>
-        <button onclick="cambiarCategoria(this, 'Accesorios')">Accesorios</button>
+        <button data-category="Caballero">Caballero</button>
+        <button data-category="Dama">Dama</button>
+        <button data-category="Calzado">Calzado</button> 
+        <button data-category="Accesorios">Accesorios</button>
     </div>
 
-    <!-- Barra de búsqueda -->
     <div class="search-container">
-
-        <input type="text" id="search" placeholder="Buscar productos..." onkeyup="filterProducts()">
-        <button type="button" onclick="filterProducts()"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <input type="text" id="search" placeholder="Buscar productos...">
+        <button type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
 
-    <!-- Botones de subcategoría -->
-    <div class="subcategoria-selector" id="subcategoriaSelector">
-    <button onclick="filtrarSubcategoria('TODOS', this)">Todos</button>
-    <button onclick="filtrarSubcategoria('NUEVOS', this)">¡Nuevos!</button>
-    <button onclick="filtrarSubcategoria('BUZOS', this)">Buzos</button>
-    <button onclick="filtrarSubcategoria('CAMPERAS', this)">Camperas</button>
-    <button onclick="filtrarSubcategoria('REMERAS', this)">Remeras</button>
-    <button onclick="filtrarSubcategoria('TOPS', this)">Tops</button>
-    <button onclick="filtrarSubcategoria('PANTALONES', this)">Pantalones</button>
-    <button onclick="filtrarSubcategoria('CALZAS', this)">Calzas</button>
-    <button onclick="filtrarSubcategoria('SHORTS', this)">Shorts</button>
-</div>
+    <div class="subcategoria-selector" id="ropaSubcatDesktop">
+        <button data-subcat="TODOS">Todos</button>
+        <button data-subcat="BUZOS">Buzos</button>
+        <button data-subcat="CAMPERAS">Camperas</button>
+        <button data-subcat="REMERAS">Remeras</button>
+        <button data-subcat="TOPS">Tops</button>
+        <button data-subcat="PANTALONES">Pantalones</button>
+        <button data-subcat="CALZAS">Calzas</button>
+        <button data-subcat="SHORTS">Shorts</button>
+    </div>
+    <div class="subcategoria-selector-movil" id="ropaSubcatMobile">
+        <select id="subcategoriaRopa">
+            <option value="TODOS">Todos</option>
+            <option value="BUZOS">Buzos</option>
+            <option value="CAMPERAS">Camperas</option>
+            <option value="REMERAS">Remeras</option>
+            <option value="TOPS">Tops</option>
+            <option value="PANTALONES">Pantalones</option>
+            <option value="CALZAS">Calzas</option>
+            <option value="SHORTS">Shorts</option>
+        </select>
+    </div>
 
-    <!-- Selector de subcategoría para móvil -->
-<div class="subcategoria-selector-movil" id="subcategoriaSelector">
-    <select id="subcategoria" onchange="seleccionarSubcategoriaDesdeMenu()">
-        <option value="TODOS">Todos</option>
-        <option value="NUEVOS">¡Nuevos!</option>
-        <option value="BUZOS">Buzos</option>
-        <option value="CAMPERAS">Camperas / Rompevientos</option>
-        <option value="REMERAS">Remeras / Musculosas</option>
-        <option value="TOPS">Tops</option>
-        <option value="PANTALONES">Babuchas / Joggings / Pantalones</option>
-        <option value="CALZAS">Calzas</option>
-        <option value="SHORTS">Bermudas / Shorts</option>
-    </select>
-</div>
+    <div class="subcategoria-selector" id="calzadoSubcatDesktop" style="display:none;">
+        <button data-subcat="TODOS">Todos</button>
+        <button data-subcat="Jaguar">Jaguar</button>
+        <button data-subcat="Gaelle">Gaelle</button>
+        <button data-subcat="Maraton">Maraton</button>
+        <button data-subcat="Havaianas">Havaianas</button>
+        <button data-subcat="I-RUN">I-RUN</button>
+    </div>
+    <div class="subcategoria-selector-movil" id="calzadoSubcatMobile" style="display:none;">
+        <select id="subcategoriaCalzado">
+            <option value="TODOS">Todos</option>
+            <option value="Jaguar">Jaguar</option>
+            <option value="Gaelle">Gaelle</option>
+            <option value="Maraton">Maraton</option>
+            <option value="Havaianas">Havaianas</option>
+            <option value="I-RUN">I-RUN</option>
+        </select>
+    </div>
 
-    <!-- Contenedor de productos -->
     <div class="catalog-container">
         <div id="products"></div>
     </div>
 
-    <!-- Modal de imagen -->
     <div id="imgModal" tabindex="-1" aria-hidden="true">
-        <img src="" alt="">
+        <img src="" alt="Vista ampliada del producto">
     </div>
 
-    <!-- Botón flotante para volver arriba -->
+    <a id="whatsapp-link" href="#" target="_blank" class="whatsapp-flotante" title="Contactar por WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
     <button id="scrollTopBtn" title="Volver arriba"><i class="fa-solid fa-circle-chevron-up"></i></button>
 
-    <!-- Script de configuración y catálogo -->
     <script src="config.js"></script>
     <script src="catalogo.js"></script>
 
     <footer>
-        <p>Contacto: indumentaria.deportivacba@gmail.com | WhatsApp: <a href="https://wa.me/+5493512429291" target="_blank">+54 9
-            351 242 9291</a></p>
-    <p>Síguenos en:
-        <a href="https://www.instagram.com/indumentariadeportivacba" target="_blank">Instagram</a> |
-        <a href="https://www.facebook.com/p/Indumentaria-Deportiva-Cordoba-100064857361330/" target="_blank">Facebook</a>
-    </p>
-    <p>© 2025 Indumentaria Deportiva CBA. Todos los derechos reservados.</p>
+        <p>Contacto: indumentaria.deportivacba@gmail.com</p>
+        <p>© 2025 Indumentaria Deportiva CBA. Todos los derechos reservados.</p>
     </footer>
 </body>
-
 </html>
