@@ -41,34 +41,6 @@ const DOM = {
  * Muestra los productos en el contenedor principal.
  * @param {Array} products - Un array de objetos de producto.
  */
-function renderProducts(products) {
-    DOM.productsContainer.innerHTML = ''; // Limpia el contenedor.
-
-    if (products.length === 0) {
-        DOM.productsContainer.innerHTML = '<p class="no-products">No se encontraron productos para esta selección.</p>';
-        return;
-    }
-
-    products.forEach(item => {
-        const productDiv = document.createElement('div');
-        productDiv.className = 'product';
-
-        // Si el stock del producto incluye "nuevo!", le añadimos una clase especial.
-        if (item.stock.includes("nuevo!")) {
-            productDiv.classList.add('producto-nuevo');
-        }
-
-        productDiv.innerHTML = `
-            <img src="${item.imagen}" alt="${item.nombre}" data-img-src="${item.imagen}" onerror="this.onerror=null; this.src='img/imagen-generica.png';">
-            <h4>${item.nombre}</h4>
-            <div class="price-container">
-                <p class="price">${textos[tipo].etiquetaPrecio}: $${formatPrice(item.precio)}</p>
-                <p class="promo-price">${textos[tipo].etiquetaPromo}: $${formatPrice(item.precioPromo)}</p>
-            </div>
-        `;
-        DOM.productsContainer.appendChild(productDiv);
-    });
-}
 
 function formatPrice(value) {
     if (value === null || value === undefined) return '0';
@@ -115,17 +87,22 @@ function renderProducts(products) {
         const productDiv = document.createElement('div');
         productDiv.className = 'product';
 
+        // --- LÓGICA DE ETIQUETAS ACTUALIZADA ---
+        // Asigna una clase según la palabra clave en el stock.
+        // Tiene prioridad: Nuevo > Reingreso > Limitado.
         if (item.stock.includes("nuevo!")) {
             productDiv.classList.add('producto-nuevo');
+        } else if (item.stock.includes("reingreso!")) {
+            productDiv.classList.add('producto-reingreso');
+        } else if (item.stock.includes("stock limitado")) {
+            productDiv.classList.add('producto-limitado');
         }
 
         // --- LÓGICA DE RENDERIZADO UNIFICADA ---
-        // Generamos dinámicamente las líneas de precios para CUALQUIER producto
         const preciosHTML = item.precios.map(p => 
             `<p class="price-line"><span class="price-label">${p.label}:</span> <span class="price-value">$${formatPrice(p.value)}</span></p>`
         ).join('');
 
-        // Usamos el mismo HTML para todas las tarjetas de producto
         productDiv.innerHTML = `
             <img src="${item.imagen}" alt="${item.nombre}" data-img-src="${item.imagen}" onerror="this.onerror=null; this.src='img/imagen-generica.png';">
             <h4>${item.nombre}</h4>
@@ -143,7 +120,7 @@ function renderProducts(products) {
 // -----------------------------------------------------------------------------
 async function loadAndRenderProducts() {
     DOM.productsContainer.innerHTML = '<p class="loading">Cargando productos...</p>';
-    const baseURL = 'https://docs.google.com/spreadsheets/d/1eWYNOMN0yQ_f8sOpSQvyHmwCAaohESkC4D73bEs60r8/gviz/tq?tqx=out:json&sheet=';
+    const baseURL = `https://docs.google.com/spreadsheets/d/1eWYNOMN0yQ_f8sOpSQvyHmwCAaohESkC4D73bEs60r8/gviz/tq?tqx=out:json&tq_nocache=${Date.now()}&sheet=`;
     
     try {
         const response = await fetch(baseURL + state.currentSheet);
@@ -153,46 +130,41 @@ async function loadAndRenderProducts() {
         const rows = jsonData.table.rows;
 
         const allProducts = rows.map(row => {
-            let producto; // Creamos una variable para el producto
+            let producto; 
 
             if (state.currentSheet === 'Calzado') {
-                // Lógica para Calzado (como ya la teníamos)
+                // --- LÓGICA DE LECTURA A PRUEBA DE ERRORES ---
+                // Priorizamos el valor formateado 'f' (que siempre es texto) sobre el valor crudo 'v'.
+                const codigoCrudo = row.c[1]?.f || row.c[1]?.v;
+
                 producto = {
                     nombre: row.c[2]?.v || "Sin nombre",
                     imagen: row.c[7]?.v?.trim() || "img/imagen-generica.png",
                     stock: String(row.c[8]?.v || "no disponible").trim().toLowerCase(),
-                    tipoPrenda: (row.c[1]?.v || '').toString().toUpperCase(),
+                    tipoPrenda: (codigoCrudo || '').toString().trim().toUpperCase(),
                     precios: []
                 };
                 
                 if (tipo === 'mayorista') {
                     producto.precios = [
                         { label: '1 a 3 pares', value: row.c[4]?.v || 0 },
-                        { label: '3 a 18 pares', value: row.c[5]?.v || 0 },
+                        { label: '4 a 17 pares', value: row.c[5]?.v || 0 },
                         { label: '+ de 18 pares', value: row.c[6]?.v || 0 }
                     ];
-                } else { // minorista
+                } else { 
                     producto.precios = [
                         { label: 'Precio', value: row.c[3]?.v || 0 }
                     ];
                 }
             } else {
-                // --- Lógica MODIFICADA para Ropa ---
-                // Ahora también crea un array de precios para ser consistente
                 producto = {
                     nombre: row.c[1]?.v || "Sin nombre",
                     imagen: row.c[5]?.v?.trim() || "img/imagen-generica.png",
                     stock: String(row.c[6]?.v || "no disponible").trim().toLowerCase(),
                     tipoPrenda: (row.c[0]?.v || '').toString().substring(0, 4).toUpperCase(),
                     precios: [
-                        { 
-                            label: textos[tipo].etiquetaPrecio, 
-                            value: (tipo === 'mayorista' ? row.c[2]?.v : row.c[4]?.v) || 0 
-                        },
-                        { 
-                            label: textos[tipo].etiquetaPromo, 
-                            value: (tipo === 'mayorista' ? row.c[4]?.v : row.c[3]?.v) || 0 
-                        }
+                        { label: textos[tipo].etiquetaPrecio, value: (tipo === 'mayorista' ? row.c[2]?.v : row.c[4]?.v) || 0 },
+                        { label: textos[tipo].etiquetaPromo, value: (tipo === 'mayorista' ? row.c[4]?.v : row.c[3]?.v) || 0 }
                     ]
                 };
             }
@@ -213,11 +185,29 @@ async function loadAndRenderProducts() {
 function filterProductsBySubcategory(products) {
     const { subcategoriaSeleccionada } = state;
     if (subcategoriaSeleccionada === "TODOS") {
-        return products.sort((a, b) => b.stock.includes("nuevo!") - a.stock.includes("nuevo!"));
+        return products.sort((a, b) => {
+            const aIsPriority = a.stock.includes("nuevo!") || a.stock.includes("reingreso");
+            const bIsPriority = b.stock.includes("nuevo!") || b.stock.includes("reingreso");
+            return bIsPriority - aIsPriority;
+        });
     }
-    // Lógica unificada: funciona para ropa y calzado
+    
     const filtros = subcategorias[subcategoriaSeleccionada] || [];
-    return products.filter(p => filtros.includes(p.tipoPrenda));
+    if (filtros.length === 0) return products;
+
+    // --- CÓDIGO TEMPORAL PARA DEPURAR ---
+    // Imprime en la consola los filtros que se están usando para la marca seleccionada.
+    console.log(`--- Depurando Filtro para '${subcategoriaSeleccionada}' ---`);
+    console.log("Filtros a aplicar:", filtros);
+    
+    return products.filter(p => {
+        const tieneMatch = filtros.some(filtro => p.tipoPrenda.startsWith(filtro));
+        
+        // Imprime la comparación para cada producto, así vemos qué pasa.
+        console.log(`Producto: '${p.tipoPrenda}' | ¿Comienza con algún filtro? -> ${tieneMatch}`);
+        
+        return tieneMatch;
+    });
 }
 
 function applySearchFilter() {
@@ -329,13 +319,48 @@ function initializeAppState() {
     state.subcategoriaSeleccionada = params.get('subcat') || 'TODOS';
     DOM.searchInput.value = params.get('search') || '';
     DOM.pageTitle.textContent = textos[tipo].tituloPagina;
-    
-    // Simula un clic en la categoría activa para configurar la UI correctamente
+
+    // --- LÓGICA DE INICIO SIMPLIFICADA Y DIRECTA ---
+
+    // 1. Muestra los filtros de subcategoría correctos sin disparar eventos
+    const ropaDesktop = document.getElementById('ropaSubcatDesktop');
+    const ropaMobile = document.getElementById('ropaSubcatMobile');
+    const calzadoDesktop = document.getElementById('calzadoSubcatDesktop');
+    const calzadoMobile = document.getElementById('calzadoSubcatMobile');
+
+    if (state.currentSheet === 'Calzado') {
+        ropaDesktop.style.display = 'none';
+        ropaMobile.style.display = 'none';
+        calzadoDesktop.style.display = '';
+        calzadoMobile.style.display = '';
+    } else if (state.currentSheet === 'Accesorios') {
+        ropaDesktop.style.display = 'none';
+        ropaMobile.style.display = 'none';
+        calzadoDesktop.style.display = 'none';
+        calzadoMobile.style.display = 'none';
+    } else { // Caballero y Dama
+        ropaDesktop.style.display = '';
+        ropaMobile.style.display = '';
+        calzadoDesktop.style.display = 'none';
+        calzadoMobile.style.display = 'none';
+    }
+
+    // 2. Marca los botones correctos como activos
     const activeCatBtn = Array.from(DOM.categoryButtons).find(btn => btn.dataset.category === state.currentSheet);
-    if(activeCatBtn) activeCatBtn.click();
+    updateActiveButton(DOM.categoryButtons, activeCatBtn);
+
+    const activeSubcatBtn = document.querySelector(`#ropaSubcatDesktop button[data-subcat='${state.subcategoriaSeleccionada}'], #calzadoSubcatDesktop button[data-subcat='${state.subcategoriaSeleccionada}']`);
+    if(activeSubcatBtn) {
+        if(state.currentSheet === 'Calzado') {
+            updateActiveButton(DOM.desktopCalzadoButtons, activeSubcatBtn);
+            DOM.mobileCalzadoSelect.value = state.subcategoriaSeleccionada;
+        } else {
+            updateActiveButton(DOM.desktopRopaButtons, activeSubcatBtn);
+            DOM.mobileRopaSelect.value = state.subcategoriaSeleccionada;
+        }
+    }
     
-    // Restablece la subcategoría después del clic simulado
-    state.subcategoriaSeleccionada = params.get('subcat') || 'TODOS';
+    // 3. Llama a la carga de datos UNA SOLA VEZ
     loadAndRenderProducts();
 }
 
@@ -349,9 +374,9 @@ const subcategorias = {
     "PANTALONES": ["PANT", "JEAN", "JOGG", "CARG", "BABU", "CHIN", "CHUP", "EPAN"],
     "CALZAS": ["CALZ"], "SHORTS": ["BERM", "SHOR", "POLL", "MALL"],
     // Calzado
-    "Jaguar": ["111", "112"],
+    "Jaguar": ["1110", "1120"],
     "Gaelle": ["371", "382", "406", "426", "427", "430W", "431W", "432W", "434W", "435", "443", "444", "448", "449W", "451", "462W", "463W", "464", "466", "465W", "467", "469W", "471W", "472W", "473W", "474", "476", "481W", "490W", "493", "498", "499W", "500W", "501"],
-    "Maraton": ["411"],
-    "Havaianas": ["511", "531", "521"],
-    "I-RUN": ["311", "312"]
+    "Maraton": ["4110"],
+    "Havaianas": ["5110", "5310", "5210"],
+    "I-RUN": ["3110", "3120"]
 };

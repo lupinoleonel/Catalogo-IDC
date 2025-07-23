@@ -127,31 +127,55 @@ nav a:hover {
     transform: scale(1.05);
 }
 
-/* --- ESTILOS PARA PRODUCTOS NUEVOS --- */
+/* --- ESTILOS PARA ETIQUETAS DE PRODUCTO --- */
 
-/* La tarjeta del producto necesita posicionamiento relativo para contener el banner */
-.product.producto-nuevo {
-    position: relative;
-    overflow: hidden; /* Esconde las partes del banner que se salen de la tarjeta */
-}
-
-/* Creamos el banner usando un pseudo-elemento ::before */
-.product.producto-nuevo::before {
-    content: "NUEVO"; /* Este es el texto que aparecerá en la cinta */
+/* Base común para todas las cintas de estado */
+.product.producto-nuevo::before,
+.product.producto-reingreso::before,
+.product.producto-limitado::before {
     position: absolute;
-    top: 18px;
-    right: -32px;
-    transform: rotate(45deg);
-    background-color: var(--color-terciario); /* Usamos tu color de resalte */
+    z-index: 10;
     color: white;
-    padding: 5px 35px;
-    font-size: 14px;
-    font-weight: 600;
     text-align: center;
+    font-weight: 600;
+    font-size: 14px;
     text-transform: uppercase;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 10;
+    
+    /* La Magia del Centrado */
+    width: 160px;          /* Ancho fijo para la cinta */
+    line-height: 32px;     /* Ayuda a centrar verticalmente el texto */
+    transform: rotate(45deg);
+    top: 22px;             /* Ajuste de posición vertical */
+    right: -42px;          /* Ajuste de posición horizontal */
 }
+
+/* Ocultamos las partes del banner que se salen de la tarjeta */
+.product.producto-nuevo,
+.product.producto-reingreso,
+.product.producto-limitado {
+    position: relative;
+    overflow: hidden; 
+}
+
+
+/* Estilo específico para "NUEVO" */
+.product.producto-nuevo::before {
+    content: "NUEVO";
+    background-color: var(--color-terciario); /* Rojo */
+}
+
+/* Estilo específico para "REINGRESO" */
+.product.producto-reingreso::before {
+    content: "REINGRESO";
+    background-color: var(--color-principal); /* Azul/Verde */
+}
+
+/* Estilo específico para "STOCK LIMITADO" */
+/* .product.producto-limitado::before {
+    content: "ÚLTIMOS";
+    background-color: var(--color-secundario);
+} */
 
 /* MODAL DE IMAGEN */
 #imgModal {
@@ -179,7 +203,7 @@ nav a:hover {
 }
 
 /* TEXTO DE PRODUCTO */
-.product h4 { /* Cambiado de h3 a h4 para coincidir con catalogo.js */
+.product h4 {
     font-size: 18px;
     margin: 10px 0;
 }
@@ -276,27 +300,6 @@ nav a:hover {
     background-color: var(--color-terciario);
 }
 
-/* BOTÓN VOLVER ARRIBA */
-#scrollTopBtn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--color-resaltar);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    padding: 12px 14px;
-    font-size: 24px;
-    cursor: pointer;
-    display: inline-block;
-    z-index: 1000;
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-#scrollTopBtn:hover {
-    background-color: var(--color-terciario);
-}
-
 /* FOOTER */
 footer {
     position: absolute;
@@ -317,6 +320,17 @@ footer a {
 
 footer a:hover {
     text-decoration: underline;
+}
+
+/* CRÉDITOS DE DESARROLLADOR */
+.dev-credit {
+    margin-top: 15px;
+    font-size: 0.8rem;
+    color: var(--color-secundario); /* Un gris claro para que sea sutil */
+}
+.dev-credit a {
+    color: white;
+    font-weight: bold;
 }
 
 /* SUBCATEGORÍAS (Desktop) */
@@ -353,7 +367,7 @@ button.active {
 
 /* ===== ESTILOS PARA BOTONES FLOTANTES ===== */
 
-/* Botón de WhatsApp (posición fija inferior, nuestra "ancla") */
+/* Botón de WhatsApp (posición fija inferior "ancla") */
 .whatsapp-flotante {
     position: fixed;
     z-index: 1000;
@@ -379,29 +393,28 @@ button.active {
 
 /* Botón de Volver Arriba (se apila sobre el de WhatsApp cuando aparece) */
 #scrollTopBtn {
+    display: none; /* Oculto por defecto, se muestra con JavaScript */
     position: fixed;
-    z-index: 1001; /* Ligeramente por encima por si acaso */
+    z-index: 1001;
     bottom: 90px; /* Posicionado justo arriba del de WhatsApp (60px de alto + 10px de espacio) */
     right: 20px;
     width: 60px;
     height: 60px;
-    background-color: var(--color-resaltar); /* Usa tu variable de color */
+    background-color: var(--color-resaltar);
     color: white;
     border: none;
     border-radius: 50%;
-    padding: 0; /* Reseteamos padding para alinear con flex */
+    padding: 0;
     font-size: 24px;
     cursor: pointer;
-    display: flex; /* Aseguramos centrado del ícono */
     align-items: center;
     justify-content: center;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
     transition: background-color 0.3s ease;
-    /* El display (block/none) ya lo controla tu JavaScript */
 }
 
 #scrollTopBtn:hover {
-    background-color: var(--color-terciario); /* Usa tu variable de color */
+    background-color: var(--color-terciario);
 }
 
 /* SUBCATEGORÍAS (Móvil) */
@@ -435,7 +448,7 @@ button.active {
     padding: 12px 15px;
     border-radius: 8px;
     margin-top: 10px;
-    text-align: left; /* Alineamos el texto a la izquierda para mayor claridad */
+    text-align: left;
 }
 
 .price-container-calzado .price-line {
