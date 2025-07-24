@@ -1,4 +1,21 @@
-/* RESET Y FUENTE */
+/* =================================================================================
+// H O J A   D E   E S T I L O S  -  I D C
+// =================================================================================
+// Versión: 3.0 (Código Refactorizado y Optimizado)
+// Descripción: Estilos para el catálogo de productos, optimizados para
+//              fácil mantenimiento y con un enfoque en diseño adaptable.
+// =================================================================================
+
+/* --- VARIABLES Y RESET BÁSICO --- */
+:root {
+    --color-principal: #00abb6;
+    --color-secundario: #dfdfdf;
+    --color-terciario: #ff5246;
+    --color-resaltar: #ff5246;
+    --color-fondo: ghostwhite;
+    --naranja-etiqueta: #E67E22;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -13,16 +30,7 @@ body {
     padding-bottom: 120px; /* Espacio para el footer */
 }
 
-/* Variables de color */
-:root {
-    --color-principal: #00abb6;
-    --color-secundario: #dfdfdf;
-    --color-terciario: #ff5246;
-    --color-resaltar: #ff5246; /* Duplicado con terciario, pero se mantiene por si se quiere cambiar individualmente */
-    --color-fondo: ghostwhite;
-}
-
-/* HEADER */
+/* --- ESTRUCTURA GENERAL (HEADER, FOOTER, ETC.) --- */
 header {
     padding: 10px;
     display: flex;
@@ -37,27 +45,78 @@ header img {
     height: 50px;
 }
 
-/* Ocultar botón hamburguesa en escritorio */
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: var(--color-principal);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+.dev-credit {
+    margin-top: 15px;
+    font-size: 0.8rem;
+    color: var(--color-secundario);
+}
+.dev-credit a {
+    color: white;
+}
+
+.catalog-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 20px;
+}
+
+/* --- NAVEGACIÓN --- */
+
 .menu-toggle {
     background: none;
     border: none;
     cursor: pointer;
-    display: none; /* Se muestra en móvil con media query */
     font-size: 24px;
     color: var(--color-secundario);
+    display: block; /* Visible por defecto en móvil */
 }
 
-/* Navegación visible por defecto en escritorio */
+/* Estilos base del menú (pensado para móvil) */
 .nav-links {
-    display: flex;
+    display: none; /* Oculto por defecto, se muestra con la clase .active */
     list-style: none;
+    flex-direction: column;
+    background-color: var(--color-principal);
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 999;
 }
 
+.nav-links.active {
+    display: flex; /* Muestra el menú cuando se hace clic en la hamburguesa */
+}
+
+/* Estilo base para los enlaces de navegación (con padding para móvil) */
 nav a {
     color: var(--color-secundario);
     text-decoration: none;
+    display: block; /* Asegura que ocupe todo el espacio de su contenedor */
     font-size: 1rem;
-    padding: 25px 20px;
+    padding: 1rem; /* Padding razonable para toques en móvil */
     transition: background-color 0.3s ease;
 }
 
@@ -65,175 +124,38 @@ nav a:hover {
     background-color: var(--color-terciario);
 }
 
-/* BANNER */
+/* --- COMPONENTES DE UI --- */
+
+/* Banner Principal */
 .banner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
+    padding: 10px 10px;
     margin: 10px 0;
 }
-
 .banner img {
-    padding: 10px;
     object-fit: contain;
     height: auto;
     border-radius: 35px;
     width: 100%;
 }
-
 .banner-img.hidden {
     display: none;
 }
 
-/* CONTENEDOR DE PRODUCTOS */
-.catalog-container {
-    max-width: 1200px;
-    margin: auto;
-}
-
-/* GRID DE PRODUCTOS */
-#products {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    justify-content: center;
-    padding: 20px;
-}
-
-/* TARJETA DE PRODUCTO */
-.product {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    text-align: center;
-    transition: transform 0.3s ease-in-out;
-}
-
-/* IMAGEN EN PRODUCTO */
-.product img {
-    max-width: 250px;
-    height: 250px;
-    object-fit: contain;
-    background-color: white;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.product img:hover {
-    transform: scale(1.05);
-}
-
-/* --- ESTILOS PARA ETIQUETAS DE PRODUCTO --- */
-
-/* Base común para todas las cintas de estado */
-.product.producto-nuevo::before,
-.product.producto-reingreso::before,
-.product.producto-limitado::before {
-    position: absolute;
-    z-index: 10;
-    color: white;
-    text-align: center;
-    font-weight: 600;
-    font-size: 14px;
-    text-transform: uppercase;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    
-    /* La Magia del Centrado */
-    width: 160px;          /* Ancho fijo para la cinta */
-    line-height: 32px;     /* Ayuda a centrar verticalmente el texto */
-    transform: rotate(45deg);
-    top: 22px;             /* Ajuste de posición vertical */
-    right: -42px;          /* Ajuste de posición horizontal */
-}
-
-/* Ocultamos las partes del banner que se salen de la tarjeta */
-.product.producto-nuevo,
-.product.producto-reingreso,
-.product.producto-limitado {
-    position: relative;
-    overflow: hidden; 
-}
-
-
-/* Estilo específico para "NUEVO" */
-.product.producto-nuevo::before {
-    content: "NUEVO";
-    background-color: var(--color-terciario); /* Rojo */
-}
-
-/* Estilo específico para "REINGRESO" */
-.product.producto-reingreso::before {
-    content: "REINGRESO";
-    background-color: var(--color-principal); /* Azul/Verde */
-}
-
-/* Estilo específico para "STOCK LIMITADO" */
-/* .product.producto-limitado::before {
-    content: "ÚLTIMOS";
-    background-color: var(--color-secundario);
-} */
-
-/* MODAL DE IMAGEN */
-#imgModal {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.85);
-    align-items: center;
-    justify-content: center;
-}
-
-#imgModal img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 12px;
-}
-
-#imgModal:focus {
-    outline: none;
-}
-
-/* TEXTO DE PRODUCTO */
-.product h4 {
-    font-size: 18px;
-    margin: 10px 0;
-}
-
-.product p {
-    font-size: 16px;
-    margin: 5px 0;
-}
-
-/* BÚSQUEDA */
+/* Barra de Búsqueda */
 .search-container {
     display: flex;
     justify-content: center;
     margin: 20px 0;
 }
-
 .search-container input {
     width: 60%;
+    max-width: 500px;
     padding: 10px;
     border: 2px solid var(--color-resaltar);
     border-radius: 25px 0 0 25px;
     font-size: 16px;
     outline: none;
-    transition: border-color 0.3s;
 }
-
-.search-container input:focus {
-    border-color: var(--color-terciario);
-}
-
 .search-container button {
     padding: 10px 20px;
     border: 2px solid var(--color-resaltar);
@@ -241,40 +163,14 @@ nav a:hover {
     color: white;
     border-radius: 0 25px 25px 0;
     cursor: pointer;
-    transition: background-color 0.3s;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
-
 .search-container button:hover {
     background-color: var(--color-terciario);
 }
 
-/* CATEGORÍAS */
-.categoria-selector {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 20px 0;
-    flex-wrap: wrap;
-}
-
-.categoria-selector button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    background-color: var(--color-principal);
-    color: var(--color-secundario);
-    border-radius: 24px;
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.categoria-selector button:hover {
-    background-color: var(--color-terciario);
-}
-
-/* BOTONES PRINCIPALES (Catálogo Minorista/Revendedor) */
+/* --- BOTONES PRINCIPALES (Página de Inicio) --- */
 .botones {
     display: flex;
     justify-content: center;
@@ -300,49 +196,8 @@ nav a:hover {
     background-color: var(--color-terciario);
 }
 
-/* FOOTER */
-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background-color: var(--color-principal);
-    color: white;
-    text-align: center;
-    padding: 20px;
-    font-size: 0.9rem;
-}
-
-footer a {
-    color: white;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-/* CRÉDITOS DE DESARROLLADOR */
-.dev-credit {
-    margin-top: 15px;
-    font-size: 0.8rem;
-    color: var(--color-secundario); /* Un gris claro para que sea sutil */
-}
-.dev-credit a {
-    color: white;
-    font-weight: bold;
-}
-
-/* SUBCATEGORÍAS (Desktop) */
-.subcategoria-selector {
-    display: flex;
-    justify-content: center;
-    margin: 15px 0;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.subcategoria-selector button {
+/* Botones de Filtro (Clase Común Optimizada) */
+.filter-button {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
@@ -353,95 +208,119 @@ footer a:hover {
     cursor: pointer;
     transition: background-color 0.3s;
 }
-
-.subcategoria-selector button:hover {
+.filter-button:hover {
     background-color: var(--color-terciario);
 }
-
-/* ESTADO ACTIVO PARA BOTONES */
-button.active {
+.filter-button.active {
     background-color: var(--color-terciario) !important;
-    color: var(--color-secundario) !important;
     font-weight: bold;
 }
 
-/* ===== ESTILOS PARA BOTONES FLOTANTES ===== */
-
-/* Botón de WhatsApp (posición fija inferior "ancla") */
-.whatsapp-flotante {
-    position: fixed;
-    z-index: 1000;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: #25D366; /* Color de WhatsApp */
-    color: white;
-    border-radius: 50%;
+/* Contenedores de los botones de filtro */
+.categoria-selector, .subcategoria-selector {
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 30px;
-    text-decoration: none;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-    transition: background-color 0.3s ease;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
 }
 
-.whatsapp-flotante:hover {
-    background-color: #128C7E; /* Tono más oscuro */
-}
-
-/* Botón de Volver Arriba (se apila sobre el de WhatsApp cuando aparece) */
-#scrollTopBtn {
-    display: none; /* Oculto por defecto, se muestra con JavaScript */
-    position: fixed;
-    z-index: 1001;
-    bottom: 90px; /* Posicionado justo arriba del de WhatsApp (60px de alto + 10px de espacio) */
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: var(--color-resaltar);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    padding: 0;
-    font-size: 24px;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-    transition: background-color 0.3s ease;
-}
-
-#scrollTopBtn:hover {
-    background-color: var(--color-terciario);
-}
-
-/* SUBCATEGORÍAS (Móvil) */
+/* Selector desplegable para móvil */
 .subcategoria-selector-movil {
-    display: none; /* Por defecto oculto en desktop */
+    display: none;
+    justify-content: center;
+    margin: 15px 0;
 }
-
-.subcategoria-selector-movil label {
-    color: white; /* No visible en móvil, se mantiene por si se habilita */
-    font-weight: 500;
-    margin-right: 8px;
-    font-size: 16px;
-}
-
 .subcategoria-selector-movil select {
     background-color: var(--color-principal);
     color: var(--color-secundario);
+    border: none;
     border-radius: 24px;
     padding: 10px 35px;
     font-size: 16px;
-    transition: background-color 0.3s ease;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* --- ESTILOS PARA TARJETA DE PRECIOS DE CALZADO --- */
+/* Botones flotantes (WhatsApp y Volver Arriba) */
+.whatsapp-flotante, #scrollTopBtn {
+    position: fixed;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+}
+.whatsapp-flotante {
+    bottom: 20px;
+    background-color: #25D366;
+    color: white;
+    font-size: 30px;
+    text-decoration: none;
+}
+.whatsapp-flotante:hover {
+    background-color: #128C7E;
+}
+#scrollTopBtn {
+    display: none;
+    bottom: 90px;
+    background-color: var(--color-resaltar);
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+#scrollTopBtn:hover {
+    background-color: var(--color-terciario);
+}
 
+/* --- GRID DE PRODUCTOS Y TARJETAS --- */
+
+#products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.product {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden; 
+}
+.product:hover {
+    transform: translateY(-5px);
+}
+
+.product img {
+    width: 100%;
+    height: 250px;
+    object-fit: contain;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+.product img:hover {
+    transform: scale(1.05);
+}
+
+.product h4 {
+    font-size: 18px;
+    margin: 10px 0;
+    min-height: 48px; /* Ayuda a alinear tarjetas con nombres de 1 o 2 líneas */
+}
+
+/* Contenedor de precios unificado */
 .price-container-calzado {
     background: var(--color-principal);
     color: white;
@@ -450,7 +329,6 @@ button.active {
     margin-top: 10px;
     text-align: left;
 }
-
 .price-container-calzado .price-line {
     display: flex;
     justify-content: space-between;
@@ -458,99 +336,106 @@ button.active {
     margin: 5px 0;
     font-size: 16px;
 }
-
-/* Estilo para la etiqueta (ej: "1 a 3 pares") */
 .price-container-calzado .price-label {
     font-weight: 500;
 }
-
-/* Estilo para el valor del precio (ej: "$10.000") */
 .price-container-calzado .price-value {
     font-weight: 700;
     font-size: 17px;
 }
 
-/* RESPONSIVE */
+/* Cintas de estado del producto (Nuevo, Reingreso, etc.) */
+.product.producto-nuevo::before,
+.product.producto-reingreso::before,
+.product.producto-limitado::before {
+    position: absolute;
+    z-index: 10;
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 160px;
+    line-height: 32px;
+    transform: rotate(45deg);
+    top: 22px;
+    right: -42px;
+}
+.product.producto-nuevo::before {
+    content: "NUEVO";
+    background-color: var(--color-terciario);
+}
+.product.producto-reingreso::before {
+    content: "REINGRESO";
+    background-color: var(--color-principal);
+}
+.product.producto-limitado::before {
+    content: "ÚLTIMOS";
+    background-color: var(--naranja-etiqueta);
+}
+
+/* Modal para ampliar imagen */
+#imgModal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+}
+#imgModal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 12px;
+}
+
+/* --- DISEÑO ADAPTABLE (Responsive) --- */
+
 @media (max-width: 768px) {
+    .catalog-container {
+        padding: 0 15px;
+    }
+    
     #products {
         grid-template-columns: repeat(2, 1fr);
     }
-
-    header {
-        justify-content: space-between; /* Ajuste para espacio entre logo y hamburguesa */
-        padding: 20px;
-    }
-
-    .menu-toggle {
-        display: block; /* Muestra el botón hamburguesa en móvil */
-    }
-
-    .nav-links {
-        display: none; /* Oculta la navegación por defecto en móvil */
-        flex-direction: column;
-        background-color: var(--color-principal);
-        padding: 10px;
-        position: absolute;
-        top: 90px; /* Debajo del header */
-        left: 0;
-        width: 100%;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        z-index: 999;
-    }
-
-    .nav-links li a {
-        color: var(--color-secundario);
-        text-decoration: none;
-        display: block;
-        font-size: 1rem;
-        padding: 0.8rem;
-        transition: background-color 0.3s ease;
-    }
-
-    .nav-links li a:hover {
-        background-color: var(--color-terciario);
-    }
-
-    .nav-links.active {
-        display: flex; /* Muestra la navegación cuando está activa */
-    }
-
-    .banner img {
-        width: 100%;
-        height: auto;
-        border-radius: 15px;
-    }
-
-    .botones {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .boton {
-        margin-bottom: 15px;
-    }
-
+    
     .subcategoria-selector {
-        display: none; /* Oculta los botones de subcategoría en móvil */
+        display: none;
     }
-
     .subcategoria-selector-movil {
-        display: flex; /* Muestra el selector desplegable en móvil */
-        justify-content: center;
-        font-family: 'Poppins', sans-serif;
-        margin: 15px 0;
-        flex-wrap: wrap;
-        gap: 10px;
+        display: flex;
     }
 }
 
 @media (max-width: 480px) {
     #products {
-        grid-template-columns: repeat(1, 1fr);
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- ESTILOS PARA ESCRITORIO (Pantallas grandes) --- */
+@media (min-width: 769px) {
+    .menu-toggle {
+        display: none; /* Ocultamos la hamburguesa en escritorio */
     }
 
-    .boton {
-        font-size: 1rem;
-        padding: 12px 25px;
+    .nav-links {
+        display: flex;
+        flex-direction: row; /* Los ítems se alinean horizontalmente */
+        position: static;    /* El menú deja de ser flotante */
+        width: auto;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    nav a {
+        /* Aplicamos el padding grande solo en escritorio */
+        padding: 15px 20px;
     }
 }

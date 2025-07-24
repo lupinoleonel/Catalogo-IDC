@@ -23,70 +23,72 @@
         </nav>
     </header>
 
-    <section class="banner">
-        <img src="img/banner-mino.png" alt="Banner Minorista Indumentaria" id="banner-minorista-indumentaria" class="banner-img hidden">
-        <img src="img/banner-mino-zapas.png" alt="Banner Minorista Calzado" id="banner-minorista-calzado" class="banner-img hidden">
-        <img src="img/banner-mayo.png" alt="Banner Mayorista Indumentaria" id="banner-mayorista-indumentaria" class="banner-img hidden">
-        <img src="img/banner-mayo-zapas.png" alt="Banner Mayorista Calzado" id="banner-mayorista-calzado" class="banner-img hidden">
-    </section>
+    <main>
+        <section class="banner">
+            <img src="img/banner-mino.png" alt="Banner Minorista Indumentaria" id="banner-minorista-indumentaria" class="banner-img hidden">
+            <img src="img/banner-mino-zapas.png" alt="Banner Minorista Calzado" id="banner-minorista-calzado" class="banner-img hidden">
+            <img src="img/banner-mayo.png" alt="Banner Mayorista Indumentaria" id="banner-mayorista-indumentaria" class="banner-img hidden">
+            <img src="img/banner-mayo-zapas.png" alt="Banner Mayorista Calzado" id="banner-mayorista-calzado" class="banner-img hidden">
+        </section>
 
-    <div class="categoria-selector">
-        <button data-category="Caballero">Caballero</button>
-        <button data-category="Dama">Dama</button>
-        <button data-category="Calzado">Calzado</button> 
-        <button data-category="Accesorios">Accesorios</button>
-    </div>
+        <div class="categoria-selector">
+            <button class="filter-button" data-category="Caballero">Caballero</button>
+            <button class="filter-button" data-category="Dama">Dama</button>
+            <button class="filter-button" data-category="Calzado">Calzado</button> 
+            <button class="filter-button" data-category="Accesorios">Accesorios</button>
+        </div>
 
-    <div class="search-container">
-        <input type="text" id="search" placeholder="Buscar productos...">
-        <button type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
-    </div>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Buscar productos...">
+            <button type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
 
-    <div class="subcategoria-selector" id="ropaSubcatDesktop">
-        <button data-subcat="TODOS">Todos</button>
-        <button data-subcat="BUZOS">Buzos</button>
-        <button data-subcat="CAMPERAS">Camperas</button>
-        <button data-subcat="REMERAS">Remeras</button>
-        <button data-subcat="TOPS">Tops</button>
-        <button data-subcat="PANTALONES">Pantalones</button>
-        <button data-subcat="CALZAS">Calzas</button>
-        <button data-subcat="SHORTS">Shorts</button>
-    </div>
-    <div class="subcategoria-selector-movil" id="ropaSubcatMobile">
-        <select id="subcategoriaRopa">
-            <option value="TODOS">Todos</option>
-            <option value="BUZOS">Buzos</option>
-            <option value="CAMPERAS">Camperas</option>
-            <option value="REMERAS">Remeras</option>
-            <option value="TOPS">Tops</option>
-            <option value="PANTALONES">Pantalones</option>
-            <option value="CALZAS">Calzas</option>
-            <option value="SHORTS">Shorts</option>
-        </select>
-    </div>
+        <div class="subcategoria-selector" id="ropaSubcatDesktop">
+            <button class="filter-button" data-subcat="TODOS">Todos</button>
+            <button class="filter-button" data-subcat="BUZOS">Buzos</button>
+            <button class="filter-button" data-subcat="CAMPERAS">Camperas</button>
+            <button class="filter-button" data-subcat="REMERAS">Remeras</button>
+            <button class="filter-button" data-subcat="TOPS">Tops</button>
+            <button class="filter-button" data-subcat="PANTALONES">Pantalones</button>
+            <button class="filter-button" data-subcat="CALZAS">Calzas</button>
+            <button class="filter-button" data-subcat="SHORTS">Shorts</button>
+        </div>
+        <div class="subcategoria-selector-movil" id="ropaSubcatMobile">
+            <select id="subcategoriaRopa">
+                <option value="TODOS">Todos</option>
+                <option value="BUZOS">Buzos</option>
+                <option value="CAMPERAS">Camperas</option>
+                <option value="REMERAS">Remeras</option>
+                <option value="TOPS">Tops</option>
+                <option value="PANTALONES">Pantalones</option>
+                <option value="CALZAS">Calzas</option>
+                <option value="SHORTS">Shorts</option>
+            </select>
+        </div>
 
-    <div class="subcategoria-selector" id="calzadoSubcatDesktop" style="display:none;">
-        <button data-subcat="TODOS">Todos</button>
-        <button data-subcat="Jaguar">Jaguar</button>
-        <button data-subcat="Gaelle">Gaelle</button>
-        <button data-subcat="Maraton">Maraton</button>
-        <button data-subcat="Havaianas">Havaianas</button>
-        <button data-subcat="I-RUN">I-RUN</button>
-    </div>
-    <div class="subcategoria-selector-movil" id="calzadoSubcatMobile" style="display:none;">
-        <select id="subcategoriaCalzado">
-            <option value="TODOS">Todos</option>
-            <option value="Jaguar">Jaguar</option>
-            <option value="Gaelle">Gaelle</option>
-            <option value="Maraton">Maraton</option>
-            <option value="Havaianas">Havaianas</option>
-            <option value="I-RUN">I-RUN</option>
-        </select>
-    </div>
+        <div class="subcategoria-selector" id="calzadoSubcatDesktop" style="display:none;">
+            <button class="filter-button" data-subcat="TODOS">Todos</button>
+            <button class="filter-button" data-subcat="Jaguar">Jaguar</button>
+            <button class="filter-button" data-subcat="Gaelle">Gaelle</button>
+            <button class="filter-button" data-subcat="Maraton">Maraton</button>
+            <button class="filter-button" data-subcat="Havaianas">Havaianas</button>
+            <button class="filter-button" data-subcat="I-RUN">I-RUN</button>
+        </div>
+        <div class="subcategoria-selector-movil" id="calzadoSubcatMobile" style="display:none;">
+            <select id="subcategoriaCalzado">
+                <option value="TODOS">Todos</option>
+                <option value="Jaguar">Jaguar</option>
+                <option value="Gaelle">Gaelle</option>
+                <option value="Maraton">Maraton</option>
+                <option value="Havaianas">Havaianas</option>
+                <option value="I-RUN">I-RUN</option>
+            </select>
+        </div>
 
-    <div class="catalog-container">
-        <div id="products"></div>
-    </div>
+        <div class="catalog-container">
+            <div id="products"></div>
+        </div>
+    </main>
 
     <div id="imgModal" tabindex="-1" aria-hidden="true">
         <img src="" alt="Vista ampliada del producto">
