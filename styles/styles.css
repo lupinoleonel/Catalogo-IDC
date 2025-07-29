@@ -370,10 +370,10 @@ nav a:hover {
     content: "REINGRESO";
     background-color: var(--color-principal);
 }
-.product.producto-limitado::before {
+/*.product.producto-limitado::before {
     content: "ÚLTIMOS";
     background-color: var(--naranja-etiqueta);
-}
+}*/
 
 /* Modal para ampliar imagen */
 #imgModal {
